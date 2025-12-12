@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Crypto & Intérêts Composés</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --success: #10b981;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header & Tabs */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+        p.subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .tabs {
+            display: flex;
+            background: #e5e7eb;
+            padding: 4px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Main Card */
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 6px; }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .input-wrapper { position: relative; }
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: border 0.2s;
+            outline: none;
+            background: #fff;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+        .calculated-hint {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 6px;
+            background: #eff6ff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Duration Quick Buttons */
+        .duration-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .dur-btn {
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid transparent;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .dur-btn:hover { background: #dbeafe; }
+
+        /* Checkbox & Contribution */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
+
+        .contrib-row {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr;
+            gap: 12px;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .btn-outline:hover { background: #f9fafb; }
+
+        /* Results Section */
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .res-box {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .res-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .res-value { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+        .res-value.highlight { color: var(--success); }
+        
+        .res-subvalue {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 6px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 6px;
+        }
+
+        /* Grid Remuneration */
+        .remun-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            background: #ecfdf5;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid #a7f3d0;
+            margin-bottom: 24px;
+        }
+        .remun-item { text-align: center; }
+        .remun-val { font-weight: 700; color: #065f46; display: block; font-size: 1.1rem; }
+        .remun-unit { font-size: 0.75rem; color: #047857; text-transform: uppercase; }
+
+        /* Bonus Current Yield */
+        #current_yield_box { margin-bottom: 24px; display:none; }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 12px 16px; text-align: right; border-bottom: 1px solid var(--border-color); }
+        th:first-child, td:first-child { text-align: left; }
+        th { background: #f9fafb; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; position: sticky; top: 0; }
+        tr:last-child td { border-bottom: none; }
+        td { font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+
+        .hidden { display: none; }
+        .error-msg { color: #dc2626; font-size: 0.85rem; margin-top: 5px; min-height: 1.2em;}
+
+        @media (min-width: 768px) {
+            .app-grid {
+                display: grid;
+                grid-template-columns: 1fr 1.3fr;
+                gap: 24px;
+                align-items: start;
+            }
+            .remun-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Calculateur d’Intérêts</h1>
+        <p class="subtitle">Crypto, Tokens & Intérêts Composés</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('modeA')">Mode A : Calculer le résultat</button>
+        <button class="tab-btn" onclick="switchTab('modeB')">Mode B : Déduire le taux</button>
+    </div>
+
+    <div class="app-grid">
+        <!-- INPUTS SECTION -->
+        <div class="card">
+            <!-- Mode A Inputs -->
+            <div id="inputsA">
+                <div class="form-group">
+                    <label>Capital Initial (Tokens & Prix)</label>
+                    <div class="input-row">
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="a_tokens" value="1000" placeholder="Nb" oninput="autoCalc('A')">
+                            <span class="input-suffix">Tok.</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="a_token_price" value="10" placeholder="Prix" oninput="autoCalc('A')">
+                            <span class="input-suffix">€/u</span>
+                        </div>
+                    </div>
+                    <div class="calculated-hint">
+                        Capital de départ : <span id="a_capital_display">10 000,00 €</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Taux annuel</label>
+                    <div class="input-wrapper">
+                        <input type="text" inputmode="decimal" id="a_rate" value="10" oninput="autoCalc('A')">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Durée (années)</label>
+                    <input type="number" id="a_years" value="5" min="1" max="50" oninput="autoCalc('A')">
+                    <div class="duration-buttons">
+                        <button class="dur-btn" onclick="setDuration('a_years', 1, 'A')">1 an</button>
+                        <button class="dur-btn" onclick="setDuration('a_years', 5, 'A')">5 ans</button>
+                        <button class="dur-btn" onclick="setDuration('a_years', 10, 'A')">10 ans</button>
+                        <button class="dur-btn" onclick="setDuration('a_years', 20, 'A')">20 ans</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Fréquence de capitalisation (Intérêts)</label>
+                    <select id="a_freq" onchange="autoCalc('A')">
+                        <option value="12">Mensuelle (Standard)</option>
+                        <option value="52">Hebdomadaire (52/an)</option>
+                        <option value="1">Annuelle</option>
+                        <option value="365">Journalière (365/an)</option>
+                        <option value="31536000">À la seconde (Continue)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="a_contrib_active" checked onchange="toggleContrib('A'); autoCalc('A')">
+                        <label for="a_contrib_active" style="margin:0">Activer les versements réguliers (€)</label>
+                    </div>
+                    <div id="a_contrib_wrapper">
+                        <div class="contrib-row">
+                            <div class="input-wrapper">
+                                <input type="text" inputmode="decimal" id="a_contrib" value="100" oninput="autoCalc('A')">
+                                <span class="input-suffix">€</span>
+                            </div>
+                            <select id="a_contrib_freq" onchange="autoCalc('A')">
+                                <option value="12">/ Mois</option>
+                                <option value="52">/ Semaine</option>
+                                <option value="365">/ Jour</option>
+                                <option value="1">/ An</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode B Inputs -->
+            <div id="inputsB" class="hidden">
+                <div class="form-group">
+                    <label>Capital Initial (Tokens & Prix)</label>
+                    <div class="input-row">
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="b_tokens" value="1000" placeholder="Nb" oninput="autoCalc('B')">
+                            <span class="input-suffix">Tok.</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="b_token_price" value="10" placeholder="Prix" oninput="autoCalc('B')">
+                            <span class="input-suffix">€/u</span>
+                        </div>
+                    </div>
+                    <div class="calculated-hint">
+                        Capital de départ : <span id="b_capital_display">10 000,00 €</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Montant final souhaité (en €)</label>
+                    <div class="input-wrapper">
+                        <input type="text" inputmode="decimal" id="b_target" value="50000" oninput="autoCalc('B')">
+                        <span class="input-suffix">€</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Durée (années)</label>
+                    <input type="number" id="b_years" value="5" min="1" max="50" oninput="autoCalc('B')">
+                </div>
+
+                <div class="form-group">
+                    <label>Fréquence de capitalisation</label>
+                    <select id="b_freq" onchange="autoCalc('B')">
+                        <option value="12">Mensuelle</option>
+                        <option value="52">Hebdomadaire</option>
+                        <option value="1">Annuelle</option>
+                        <option value="365">Journalière</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                         <input type="checkbox" id="b_contrib_active" onchange="toggleContrib('B'); autoCalc('B')">
+                         <label for="b_contrib_active" style="margin:0">Inclure des versements réguliers</label>
+                    </div>
+                    <div id="b_contrib_wrapper" style="opacity:0.5; pointer-events:none;">
+                        <div class="contrib-row">
+                             <div class="input-wrapper">
+                                <input type="text" inputmode="decimal" id="b_contrib" value="0" oninput="autoCalc('B')">
+                                <span class="input-suffix">€</span>
+                            </div>
+                            <select id="b_contrib_freq" onchange="autoCalc('B')">
+                                <option value="12">/ Mois</option>
+                                <option value="52">/ Semaine</option>
+                                <option value="365">/ Jour</option>
+                                <option value="1">/ An</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-msg" id="errorMsg"></div>
+
+            <div class="actions">
+                <button class="btn btn-outline" onclick="resetForm()">Réinitialiser</button>
+                <button class="btn btn-primary" onclick="forceCalc()">Calculer</button>
+            </div>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div class="output-section">
+            
+            <!-- Summary Grid -->
+            <div class="results-summary">
+                <div class="res-box">
+                    <div class="res-label" id="res_label_1">Montant Final</div>
+                    <div class="res-value highlight" id="res_val_1">- €</div>
+                    <div class="res-subvalue" id="res_tokens_total"></div>
+                </div>
+                <div class="res-box">
+                    <div class="res-label" id="res_label_2">Intérêts Gagnés</div>
+                    <div class="res-value" id="res_val_2">- €</div>
+                    <div class="res-subvalue" id="res_tokens_gained"></div>
+                </div>
+                <div class="res-box">
+                    <div class="res-label" id="res_label_3">Capital Versé</div>
+                    <div class="res-value" id="res_val_3">- €</div>
+                    <div class="res-subvalue" id="res_tokens_bought"></div>
+                </div>
+            </div>
+
+            <!-- Passive Income Block -->
+            <h3 style="font-size:1rem; margin-bottom:10px;">Rémunération équivalente (Gain moyen)</h3>
+            <div class="remun-grid">
+                <div class="remun-item"><span class="remun-val" id="gain_second">-</span> <span class="remun-unit">€ / Seconde</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_day">-</span> <span class="remun-unit">€ / Jour</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_week">-</span> <span class="remun-unit">€ / Semaine</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_month">-</span> <span class="remun-unit">€ / Mois</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_year">-</span> <span class="remun-unit">€ / An</span></div>
+            </div>
+            
+            <!-- Bonus: Current Yield -->
+            <div id="current_yield_box">
+                 <div class="res-box" style="background: #fffbeb; border-color: #fcd34d;">
+                    <div class="res-label" style="color: #92400e;">Rente théorique fin de période (Capital Final × Taux)</div>
+                    <div class="res-value" style="color: #b45309; font-size: 1rem;" id="yield_val">- € / an</div>
+                 </div>
+            </div>
+
+            <!-- Detail Table -->
+            <h3 style="font-size:1rem; margin-bottom:10px;" id="tableTitle">Détail année par année</h3>
+            <div class="table-container">
+                <table id="resultTable">
+                    <thead><!-- Headers JS --></thead>
+                    <tbody><!-- Rows JS --></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- STATE ---
+    let currentMode = 'modeA';
+    const SECONDS_IN_YEAR = 31536000;
+
+    // --- UTILS ---
+    function parseFR(val) {
+        if (!val) return 0;
+        let clean = val.toString().replace(/\s/g, '').replace(',', '.');
+        let num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
+    }
+
+    function formatEUR(num) {
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(num);
+    }
+    
+    function formatPct(num) {
+        return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(num) + ' %';
+    }
+
+    function formatToken(num) {
+        return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    }
+
+    // --- DOM HANDLERS ---
+    function switchTab(mode) {
+        currentMode = mode;
+        
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (mode === 'modeA') {
+            document.getElementById('inputsA').classList.remove('hidden');
+            document.getElementById('inputsB').classList.add('hidden');
+            document.getElementById('res_label_1').innerText = "Montant Final";
+            document.getElementById('res_label_2').innerText = "Intérêts Gagnés";
+            document.getElementById('res_label_3').innerText = "Capital Versé";
+            document.getElementById('tableTitle').innerText = "Détail année par année";
+        } else {
+            document.getElementById('inputsA').classList.add('hidden');
+            document.getElementById('inputsB').classList.remove('hidden');
+            document.getElementById('res_label_1').innerText = "Taux Nécessaire";
+            document.getElementById('res_label_2').innerText = "Gain Total";
+            document.getElementById('res_label_3').innerText = "Capital Investi";
+            document.getElementById('tableTitle').innerText = "Taux requis selon durée";
+        }
+        
+        calculate();
+    }
+
+    function toggleContrib(mode) {
+        const idCheck = mode === 'A' ? 'a_contrib_active' : 'b_contrib_active';
+        const idWrap = mode === 'A' ? 'a_contrib_wrapper' : 'b_contrib_wrapper';
+        
+        const checkbox = document.getElementById(idCheck);
+        const wrapper = document.getElementById(idWrap);
+        
+        if (checkbox.checked) {
+            wrapper.style.opacity = '1';
+            wrapper.style.pointerEvents = 'auto';
+        } else {
+            wrapper.style.opacity = '0.5';
+            wrapper.style.pointerEvents = 'none';
+        }
+    }
+
+    function setDuration(id, val, mode) {
+        document.getElementById(id).value = val;
+        autoCalc(mode);
+    }
+
+    function resetForm() {
+        if (currentMode === 'modeA') {
+            document.getElementById('a_tokens').value = "1000";
+            document.getElementById('a_token_price').value = "10";
+            document.getElementById('a_rate').value = "10";
+            document.getElementById('a_years').value = "5";
+            document.getElementById('a_freq').value = "12";
+            document.getElementById('a_contrib').value = "100";
+            document.getElementById('a_contrib_freq').value = "12";
+            document.getElementById('a_contrib_active').checked = true;
+            toggleContrib('A');
+        } else {
+            document.getElementById('b_tokens').value = "1000";
+            document.getElementById('b_token_price').value = "10";
+            document.getElementById('b_target').value = "50000";
+            document.getElementById('b_years').value = "5";
+            document.getElementById('b_freq').value = "12";
+            document.getElementById('b_contrib_active').checked = false;
+            toggleContrib('B');
+        }
+        calculate();
+    }
+
+    function autoCalc(modeTrigger) {
+        if (currentMode === 'modeA' && modeTrigger === 'A') calculate();
+        if (currentMode === 'modeB' && modeTrigger === 'B') calculate();
+    }
+
+    function forceCalc() { calculate(); }
+
+    // --- CORE SIMULATION ENGINE ---
+    
+    // Simulate balance over time with daily resolution for accuracy
+    function runSimulation(principal, ratePct, years, compFreq, contribAmount, contribFreq) {
+        let balance = principal;
+        let totalInvested = principal;
+        const r_decimal = ratePct / 100;
+        
+        // Days loop setup
+        // We simulate 365 days per year
+        const totalDays = years * 365;
+        
+        // Frequencies convert to day intervals
+        // Compounding
+        let compInterval = 365; // Default annual
+        if (compFreq === 12) compInterval = 365 / 12; // ~30.41 days
+        else if (compFreq === 52) compInterval = 365 / 52; // ~7 days
+        else if (compFreq === 365) compInterval = 1; // 1 day
+        else if (compFreq > 365) compInterval = 1; // High freq treated as daily update with continuous logic inside
+        
+        // Contribution
+        let contribInterval = 0;
+        if (contribAmount > 0) {
+            if (contribFreq === 1) contribInterval = 365;
+            else if (contribFreq === 12) contribInterval = 365 / 12;
+            else if (contribFreq === 52) contribInterval = 365 / 52;
+            else if (contribFreq === 365) contribInterval = 1;
+        }
+
+        // Daily Rate for simulation
+        // Effective Daily Rate = (1 + r)^(1/365) - 1  for standard compounding
+        // OR r/365 for simple daily rates
+        // Standard financial formula: (1 + r/n)^(n*t).
+        // If we simulate daily, we need a daily multiplier that matches the annual rate.
+        // Simplification for web-app: use r_decimal / compFreq applied at intervals.
+        
+        let yearlyData = [];
+        let nextCompDay = compInterval;
+        let nextContribDay = contribInterval;
+        
+        // Interest buffer (accrued between compounding events)
+        let accruedInterest = 0;
+
+        for (let d = 1; d <= totalDays; d++) {
+            
+            // 1. Add Contribution ?
+            if (contribAmount > 0 && d >= nextContribDay) {
+                balance += contribAmount;
+                totalInvested += contribAmount;
+                nextContribDay += contribInterval;
+            }
+
+            // 2. Calculate Interest ?
+            // Continuous (Seconds) or Daily or High Freq
+            if (compFreq >= 365) {
+                // Apply daily interest share
+                // Rate per day = r / 365 (nominal) or (1+r)^(1/365)-1 (effective)
+                // Let's use Nominal rate split (r / n) logic which is standard for APR
+                let dailyRate = r_decimal / (compFreq > 365 ? 365 : compFreq); 
+                // If "Seconds", we just use daily resolution but formula for continuous is e^(rt).
+                // Let's stick to standard bank formula: balance * (rate/365) added daily
+                let interest = balance * (r_decimal / 365);
+                balance += interest;
+            } 
+            else {
+                // Discrete Compounding (Monthly, Weekly, Annual)
+                // We shouldn't change balance until the interval is hit.
+                // BUT simple simulation:
+                if (d >= nextCompDay) {
+                    // Time passed fraction = 1 / compFreq
+                    let periodRate = r_decimal / compFreq;
+                    let interest = balance * periodRate;
+                    balance += interest;
+                    nextCompDay += compInterval;
+                }
+            }
+
+            // End of Year Snapshot
+            if (d % 365 === 0) {
+                let year = d / 365;
+                yearlyData.push({
+                    year: year,
+                    balance: balance,
+                    invested: totalInvested,
+                    interest: balance - totalInvested
+                });
+            }
+        }
+
+        return {
+            finalBalance: balance,
+            totalInvested: totalInvested,
+            totalInterest: balance - totalInvested,
+            yearlyData: yearlyData
+        };
+    }
+
+    // --- MAIN CALCULATORS ---
+
+    function calculate() {
+        const errorDiv = document.getElementById('errorMsg');
+        errorDiv.innerText = "";
+        
+        if (currentMode === 'modeA') calculateModeA(errorDiv);
+        else calculateModeB(errorDiv);
+    }
+
+    function calculateModeA(errorDiv) {
+        // Inputs
+        const tokens = parseFR(document.getElementById('a_tokens').value);
+        const tokenPrice = parseFR(document.getElementById('a_token_price').value);
+        const P = tokens * tokenPrice;
+        document.getElementById('a_capital_display').innerText = formatEUR(P);
+
+        const r_pct = parseFR(document.getElementById('a_rate').value);
+        const years = parseInt(document.getElementById('a_years').value);
+        const compFreq = parseInt(document.getElementById('a_freq').value);
+        
+        const hasContrib = document.getElementById('a_contrib_active').checked;
+        const contribVal = hasContrib ? parseFR(document.getElementById('a_contrib').value) : 0;
+        const contribFreq = parseInt(document.getElementById('a_contrib_freq').value);
+
+        if (P < 0 || r_pct < 0 || years <= 0) {
+            errorDiv.innerText = "Veuillez vérifier les valeurs.";
+            return;
+        }
+
+        // Run Sim
+        const res = runSimulation(P, r_pct, years, compFreq, contribVal, contribFreq);
+
+        // Display
+        updateResults(res, tokenPrice, years, r_pct);
+        buildTable(res.yearlyData, tokenPrice);
+    }
+
+    function calculateModeB(errorDiv) {
+        // Inputs
+        const tokens = parseFR(document.getElementById('b_tokens').value);
+        const tokenPrice = parseFR(document.getElementById('b_token_price').value);
+        const P = tokens * tokenPrice;
+        document.getElementById('b_capital_display').innerText = formatEUR(P);
+
+        const target = parseFR(document.getElementById('b_target').value);
+        const years = parseInt(document.getElementById('b_years').value);
+        const compFreq = parseInt(document.getElementById('b_freq').value);
+        
+        const hasContrib = document.getElementById('b_contrib_active').checked;
+        const contribVal = hasContrib ? parseFR(document.getElementById('b_contrib').value) : 0;
+        const contribFreq = parseInt(document.getElementById('b_contrib_freq').value);
+
+        if (P < 0 || target <= P && contribVal === 0) {
+            errorDiv.innerText = "Le montant visé semble trop faible par rapport au départ.";
+            clearResults();
+            return;
+        }
+
+        // FIND RATE via Binary Search
+        let low = 0;
+        let high = 10000; // Max 10,000%
+        let foundRate = 0;
+        let iterations = 0;
+        
+        // Precision loop
+        while (iterations < 100) {
+            let mid = (low + high) / 2;
+            let sim = runSimulation(P, mid, years, compFreq, contribVal, contribFreq);
+            
+            if (Math.abs(sim.finalBalance - target) < 1) { // 1€ precision
+                foundRate = mid;
+                break;
+            }
+            if (sim.finalBalance < target) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+            foundRate = mid;
+            iterations++;
+        }
+
+        document.getElementById('res_val_1').innerText = formatPct(foundRate);
+        
+        // Re-run final sim for details
+        const finalSim = runSimulation(P, foundRate, years, compFreq, contribVal, contribFreq);
+        
+        // Manual override for display logic in Mode B
+        document.getElementById('res_val_2').innerText = formatEUR(finalSim.totalInterest);
+        document.getElementById('res_val_3').innerText = formatEUR(finalSim.totalInvested);
+        
+        // Token details
+        if (tokenPrice > 0) {
+            const totalTok = finalSim.finalBalance / tokenPrice;
+            const gainTok = finalSim.totalInterest / tokenPrice;
+            const boughtTok = (finalSim.totalInvested - P) / tokenPrice;
+            
+            document.getElementById('res_tokens_total').innerText = `Total : ${formatToken(totalTok)} Tokens`;
+            document.getElementById('res_tokens_gained').innerText = `+ ${formatToken(gainTok)} Tokens (Intérêts)`;
+            document.getElementById('res_tokens_bought').innerText = `+ ${formatToken(boughtTok)} Tokens (Achetés)`;
+        }
+
+        updateRemuneration(finalSim.totalInterest, years);
+        
+        // Table for Mode B (Fixed rate, history view)
+        buildTable(finalSim.yearlyData, tokenPrice);
+        document.getElementById('tableTitle').innerText = "Simulation avec le taux trouvé";
+    }
+
+    // --- DISPLAY HELPERS ---
+
+    function updateResults(res, tokenPrice, years, r_pct) {
+        document.getElementById('res_val_1').innerText = formatEUR(res.finalBalance);
+        document.getElementById('res_val_2').innerText = formatEUR(res.totalInterest);
+        document.getElementById('res_val_3').innerText = formatEUR(res.totalInvested);
+
+        if (tokenPrice > 0) {
+            const initialTokens = res.totalInvested > 0 ? (res.totalInvested / tokenPrice) : 0; // Simple approx for bought
+            // More accurate: Initial + (Contrib / Price)
+            // But we don't track bought tokens in Sim loop separately, let's deduce
+            const startTokens = parseFR(document.getElementById('a_tokens').value);
+            const boughtTokens = (res.totalInvested - (startTokens * tokenPrice)) / tokenPrice;
+            const totalTokens = res.finalBalance / tokenPrice;
+            const interestTokens = res.totalInterest / tokenPrice;
+
+            document.getElementById('res_tokens_total').innerText = `Total : ${formatToken(totalTokens)} Tokens`;
+            document.getElementById('res_tokens_gained').innerText = `+ ${formatToken(interestTokens)} Tokens (Intérêts)`;
+            document.getElementById('res_tokens_bought').innerText = `+ ${formatToken(boughtTokens)} Tokens (Achetés)`;
+        } else {
+             document.querySelectorAll('.res-subvalue').forEach(el => el.innerText = '');
+        }
+
+        updateRemuneration(res.totalInterest, years);
+
+        // Theoretical Yield
+        const theoreticalAnnualYield = res.finalBalance * (r_pct/100);
+        const yieldBox = document.getElementById('current_yield_box');
+        if (theoreticalAnnualYield > 0) {
+            yieldBox.style.display = 'block';
+            document.getElementById('yield_val').innerText = formatEUR(theoreticalAnnualYield) + " / an";
+        } else {
+            yieldBox.style.display = 'none';
+        }
+    }
+
+    function updateRemuneration(totalInterests, years) {
+        if (years <= 0) years = 1;
+        const perYear = totalInterests / years;
+        const perMonth = perYear / 12;
+        const perWeek = perYear / 52;
+        const perDay = perYear / 365;
+        const perSecond = perYear / SECONDS_IN_YEAR;
+
+        const formatSmall = (val) => {
+            let digits = val < 0.01 ? 5 : (val < 1 ? 4 : 2);
+            return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
+        };
+
+        document.getElementById('gain_year').innerText = formatSmall(perYear);
+        document.getElementById('gain_month').innerText = formatSmall(perMonth);
+        document.getElementById('gain_week').innerText = formatSmall(perWeek);
+        document.getElementById('gain_day').innerText = formatSmall(perDay);
+        document.getElementById('gain_second').innerText = formatSmall(perSecond);
+    }
+
+    function buildTable(data, tokenPrice) {
+        const tableBody = document.querySelector('#resultTable tbody');
+        const tableHead = document.querySelector('#resultTable thead');
+        tableBody.innerHTML = '';
+        tableHead.innerHTML = `<tr><th>Année</th><th>Capital Début</th><th>Intérêts</th><th>Versements</th><th>Capital Fin</th></tr>`;
+
+        // We only have end-of-year data in 'data' array.
+        // We need to reconstruct Start/Contrib/Interest from previous row.
+        let prevBalance = data.length > 0 ? (data[0].invested - (data[0].invested - data[0].balance)) : 0; 
+        // Logic fix: The simulation returns cumulative data.
+        // We need diffs.
+        
+        // Actually, Sim returns snapshots.
+        // Year 1: Balance X, Invested Y.
+        // Start Balance was Initial P.
+        
+        let initialP = currentMode === 'modeA' 
+            ? parseFR(document.getElementById('a_tokens').value) * parseFR(document.getElementById('a_token_price').value)
+            : parseFR(document.getElementById('b_tokens').value) * parseFR(document.getElementById('b_token_price').value);
+
+        let lastBalance = initialP;
+        let lastInvested = initialP;
+
+        data.forEach(row => {
+            const yearContrib = row.invested - lastInvested;
+            // Interest this year = (EndBalance - StartBalance) - Contrib
+            const yearInterest = (row.balance - lastBalance) - yearContrib;
+            
+            let htmlRow = `<tr>
+                <td>${row.year}</td>
+                <td>${formatEUR(lastBalance)}</td>
+                <td style="color:var(--success)">+${formatEUR(yearInterest)}</td>
+                <td>${formatEUR(yearContrib)}</td>
+                <td><strong>${formatEUR(row.balance)}</strong></td>
+            </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', htmlRow);
+
+            lastBalance = row.balance;
+            lastInvested = row.invested;
+        });
+    }
+
+    function clearResults() {
+        document.getElementById('res_val_1').innerText = "-";
+        document.getElementById('res_val_2').innerText = "-";
+        document.getElementById('res_val_3').innerText = "-";
+        document.querySelectorAll('.res-subvalue').forEach(el => el.innerText = '');
+    }
+
+    window.onload = () => { calculate(); }
+</script>
+
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur Crypto & Intérêts Composés</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --success: #10b981;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Header & Tabs */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+        p.subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .tabs {
+            display: flex;
+            background: #e5e7eb;
+            padding: 4px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Main Card */
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 6px; }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .input-wrapper { position: relative; }
+        .input-suffix {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: border 0.2s;
+            outline: none;
+            background: #fff;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+        .calculated-hint {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 6px;
+            background: #eff6ff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Duration Quick Buttons */
+        .duration-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .dur-btn {
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid transparent;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .dur-btn:hover { background: #dbeafe; }
+
+        /* Checkbox & Contribution */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); }
+
+        .contrib-row {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr;
+            gap: 12px;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .btn-outline:hover { background: #f9fafb; }
+
+        /* Results Section */
+        .results-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .res-box {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .res-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .res-value { font-size: 1.25rem; font-weight: 700; color: var(--text-main); }
+        .res-value.highlight { color: var(--success); }
+        
+        .res-subvalue {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 6px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 6px;
+        }
+
+        /* Grid Remuneration */
+        .remun-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            background: #ecfdf5;
+            padding: 16px;
+            border-radius: 10px;
+            border: 1px solid #a7f3d0;
+            margin-bottom: 24px;
+        }
+        .remun-item { text-align: center; }
+        .remun-val { font-weight: 700; color: #065f46; display: block; font-size: 1.1rem; }
+        .remun-unit { font-size: 0.75rem; color: #047857; text-transform: uppercase; }
+
+        /* Bonus Current Yield */
+        #current_yield_box { margin-bottom: 24px; display:none; }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 12px 16px; text-align: right; border-bottom: 1px solid var(--border-color); }
+        th:first-child, td:first-child { text-align: left; }
+        th { background: #f9fafb; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; position: sticky; top: 0; }
+        tr:last-child td { border-bottom: none; }
+        td { font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+
+        .hidden { display: none; }
+        .error-msg { color: #dc2626; font-size: 0.85rem; margin-top: 5px; min-height: 1.2em;}
+
+        @media (min-width: 768px) {
+            .app-grid {
+                display: grid;
+                grid-template-columns: 1fr 1.3fr;
+                gap: 24px;
+                align-items: start;
+            }
+            .remun-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Calculateur d’Intérêts</h1>
+        <p class="subtitle">Crypto, Tokens & Intérêts Composés</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('modeA')">Mode A : Calculer le résultat</button>
+        <button class="tab-btn" onclick="switchTab('modeB')">Mode B : Déduire le taux</button>
+    </div>
+
+    <div class="app-grid">
+        <!-- INPUTS SECTION -->
+        <div class="card">
+            <!-- Mode A Inputs -->
+            <div id="inputsA">
+                <div class="form-group">
+                    <label>Capital Initial (Tokens & Prix)</label>
+                    <div class="input-row">
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="a_tokens" value="1000" placeholder="Nb" oninput="autoCalc('A')">
+                            <span class="input-suffix">Tok.</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="a_token_price" value="10" placeholder="Prix" oninput="autoCalc('A')">
+                            <span class="input-suffix">€/u</span>
+                        </div>
+                    </div>
+                    <div class="calculated-hint">
+                        Capital de départ : <span id="a_capital_display">10 000,00 €</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Taux annuel</label>
+                    <div class="input-wrapper">
+                        <input type="text" inputmode="decimal" id="a_rate" value="10" oninput="autoCalc('A')">
+                        <span class="input-suffix">%</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Durée (années)</label>
+                    <input type="number" id="a_years" value="5" min="1" max="50" oninput="autoCalc('A')">
+                    <div class="duration-buttons">
+                        <button class="dur-btn" onclick="setDuration('a_years', 1, 'A')">1 an</button>
+                        <button class="dur-btn" onclick="setDuration('a_years', 5, 'A')">5 ans</button>
+                        <button class="dur-btn" onclick="setDuration('a_years', 10, 'A')">10 ans</button>
+                        <button class="dur-btn" onclick="setDuration('a_years', 20, 'A')">20 ans</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Fréquence de capitalisation (Intérêts)</label>
+                    <select id="a_freq" onchange="autoCalc('A')">
+                        <option value="12">Mensuelle (Standard)</option>
+                        <option value="52">Hebdomadaire (52/an)</option>
+                        <option value="1">Annuelle</option>
+                        <option value="365">Journalière (365/an)</option>
+                        <option value="31536000">À la seconde (Continue)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="a_contrib_active" checked onchange="toggleContrib('A'); autoCalc('A')">
+                        <label for="a_contrib_active" style="margin:0">Activer les versements réguliers (€)</label>
+                    </div>
+                    <div id="a_contrib_wrapper">
+                        <div class="contrib-row">
+                            <div class="input-wrapper">
+                                <input type="text" inputmode="decimal" id="a_contrib" value="100" oninput="autoCalc('A')">
+                                <span class="input-suffix">€</span>
+                            </div>
+                            <select id="a_contrib_freq" onchange="autoCalc('A')">
+                                <option value="12">/ Mois</option>
+                                <option value="52">/ Semaine</option>
+                                <option value="365">/ Jour</option>
+                                <option value="1">/ An</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode B Inputs -->
+            <div id="inputsB" class="hidden">
+                <div class="form-group">
+                    <label>Capital Initial (Tokens & Prix)</label>
+                    <div class="input-row">
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="b_tokens" value="1000" placeholder="Nb" oninput="autoCalc('B')">
+                            <span class="input-suffix">Tok.</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="text" inputmode="decimal" id="b_token_price" value="10" placeholder="Prix" oninput="autoCalc('B')">
+                            <span class="input-suffix">€/u</span>
+                        </div>
+                    </div>
+                    <div class="calculated-hint">
+                        Capital de départ : <span id="b_capital_display">10 000,00 €</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Montant final souhaité (en €)</label>
+                    <div class="input-wrapper">
+                        <input type="text" inputmode="decimal" id="b_target" value="50000" oninput="autoCalc('B')">
+                        <span class="input-suffix">€</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Durée (années)</label>
+                    <input type="number" id="b_years" value="5" min="1" max="50" oninput="autoCalc('B')">
+                </div>
+
+                <div class="form-group">
+                    <label>Fréquence de capitalisation</label>
+                    <select id="b_freq" onchange="autoCalc('B')">
+                        <option value="12">Mensuelle</option>
+                        <option value="52">Hebdomadaire</option>
+                        <option value="1">Annuelle</option>
+                        <option value="365">Journalière</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                         <input type="checkbox" id="b_contrib_active" onchange="toggleContrib('B'); autoCalc('B')">
+                         <label for="b_contrib_active" style="margin:0">Inclure des versements réguliers</label>
+                    </div>
+                    <div id="b_contrib_wrapper" style="opacity:0.5; pointer-events:none;">
+                        <div class="contrib-row">
+                             <div class="input-wrapper">
+                                <input type="text" inputmode="decimal" id="b_contrib" value="0" oninput="autoCalc('B')">
+                                <span class="input-suffix">€</span>
+                            </div>
+                            <select id="b_contrib_freq" onchange="autoCalc('B')">
+                                <option value="12">/ Mois</option>
+                                <option value="52">/ Semaine</option>
+                                <option value="365">/ Jour</option>
+                                <option value="1">/ An</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="error-msg" id="errorMsg"></div>
+
+            <div class="actions">
+                <button class="btn btn-outline" onclick="resetForm()">Réinitialiser</button>
+                <button class="btn btn-primary" onclick="forceCalc()">Calculer</button>
+            </div>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div class="output-section">
+            
+            <!-- Summary Grid -->
+            <div class="results-summary">
+                <div class="res-box">
+                    <div class="res-label" id="res_label_1">Montant Final</div>
+                    <div class="res-value highlight" id="res_val_1">- €</div>
+                    <div class="res-subvalue" id="res_tokens_total"></div>
+                </div>
+                <div class="res-box">
+                    <div class="res-label" id="res_label_2">Intérêts Gagnés</div>
+                    <div class="res-value" id="res_val_2">- €</div>
+                    <div class="res-subvalue" id="res_tokens_gained"></div>
+                </div>
+                <div class="res-box">
+                    <div class="res-label" id="res_label_3">Capital Versé</div>
+                    <div class="res-value" id="res_val_3">- €</div>
+                    <div class="res-subvalue" id="res_tokens_bought"></div>
+                </div>
+            </div>
+
+            <!-- Passive Income Block -->
+            <h3 style="font-size:1rem; margin-bottom:10px;">Rémunération équivalente (Gain moyen)</h3>
+            <div class="remun-grid">
+                <div class="remun-item"><span class="remun-val" id="gain_second">-</span> <span class="remun-unit">€ / Seconde</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_day">-</span> <span class="remun-unit">€ / Jour</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_week">-</span> <span class="remun-unit">€ / Semaine</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_month">-</span> <span class="remun-unit">€ / Mois</span></div>
+                <div class="remun-item"><span class="remun-val" id="gain_year">-</span> <span class="remun-unit">€ / An</span></div>
+            </div>
+            
+            <!-- Bonus: Current Yield -->
+            <div id="current_yield_box">
+                 <div class="res-box" style="background: #fffbeb; border-color: #fcd34d;">
+                    <div class="res-label" style="color: #92400e;">Rente théorique fin de période (Capital Final × Taux)</div>
+                    <div class="res-value" style="color: #b45309; font-size: 1rem;" id="yield_val">- € / an</div>
+                 </div>
+            </div>
+
+            <!-- Detail Table -->
+            <h3 style="font-size:1rem; margin-bottom:10px;" id="tableTitle">Détail année par année</h3>
+            <div class="table-container">
+                <table id="resultTable">
+                    <thead><!-- Headers JS --></thead>
+                    <tbody><!-- Rows JS --></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- STATE ---
+    let currentMode = 'modeA';
+    const SECONDS_IN_YEAR = 31536000;
+
+    // --- UTILS ---
+    function parseFR(val) {
+        if (!val) return 0;
+        let clean = val.toString().replace(/\s/g, '').replace(',', '.');
+        let num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
+    }
+
+    function formatEUR(num) {
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(num);
+    }
+    
+    function formatPct(num) {
+        return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(num) + ' %';
+    }
+
+    function formatToken(num) {
+        return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    }
+
+    // --- DOM HANDLERS ---
+    function switchTab(mode) {
+        currentMode = mode;
+        
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (mode === 'modeA') {
+            document.getElementById('inputsA').classList.remove('hidden');
+            document.getElementById('inputsB').classList.add('hidden');
+            document.getElementById('res_label_1').innerText = "Montant Final";
+            document.getElementById('res_label_2').innerText = "Intérêts Gagnés";
+            document.getElementById('res_label_3').innerText = "Capital Versé";
+            document.getElementById('tableTitle').innerText = "Détail année par année";
+        } else {
+            document.getElementById('inputsA').classList.add('hidden');
+            document.getElementById('inputsB').classList.remove('hidden');
+            document.getElementById('res_label_1').innerText = "Taux Nécessaire";
+            document.getElementById('res_label_2').innerText = "Gain Total";
+            document.getElementById('res_label_3').innerText = "Capital Investi";
+            document.getElementById('tableTitle').innerText = "Taux requis selon durée";
+        }
+        
+        calculate();
+    }
+
+    function toggleContrib(mode) {
+        const idCheck = mode === 'A' ? 'a_contrib_active' : 'b_contrib_active';
+        const idWrap = mode === 'A' ? 'a_contrib_wrapper' : 'b_contrib_wrapper';
+        
+        const checkbox = document.getElementById(idCheck);
+        const wrapper = document.getElementById(idWrap);
+        
+        if (checkbox.checked) {
+            wrapper.style.opacity = '1';
+            wrapper.style.pointerEvents = 'auto';
+        } else {
+            wrapper.style.opacity = '0.5';
+            wrapper.style.pointerEvents = 'none';
+        }
+    }
+
+    function setDuration(id, val, mode) {
+        document.getElementById(id).value = val;
+        autoCalc(mode);
+    }
+
+    function resetForm() {
+        if (currentMode === 'modeA') {
+            document.getElementById('a_tokens').value = "1000";
+            document.getElementById('a_token_price').value = "10";
+            document.getElementById('a_rate').value = "10";
+            document.getElementById('a_years').value = "5";
+            document.getElementById('a_freq').value = "12";
+            document.getElementById('a_contrib').value = "100";
+            document.getElementById('a_contrib_freq').value = "12";
+            document.getElementById('a_contrib_active').checked = true;
+            toggleContrib('A');
+        } else {
+            document.getElementById('b_tokens').value = "1000";
+            document.getElementById('b_token_price').value = "10";
+            document.getElementById('b_target').value = "50000";
+            document.getElementById('b_years').value = "5";
+            document.getElementById('b_freq').value = "12";
+            document.getElementById('b_contrib_active').checked = false;
+            toggleContrib('B');
+        }
+        calculate();
+    }
+
+    function autoCalc(modeTrigger) {
+        if (currentMode === 'modeA' && modeTrigger === 'A') calculate();
+        if (currentMode === 'modeB' && modeTrigger === 'B') calculate();
+    }
+
+    function forceCalc() { calculate(); }
+
+    // --- CORE SIMULATION ENGINE ---
+    
+    // Simulate balance over time with daily resolution for accuracy
+    function runSimulation(principal, ratePct, years, compFreq, contribAmount, contribFreq) {
+        let balance = principal;
+        let totalInvested = principal;
+        const r_decimal = ratePct / 100;
+        
+        // Days loop setup
+        // We simulate 365 days per year
+        const totalDays = years * 365;
+        
+        // Frequencies convert to day intervals
+        // Compounding
+        let compInterval = 365; // Default annual
+        if (compFreq === 12) compInterval = 365 / 12; // ~30.41 days
+        else if (compFreq === 52) compInterval = 365 / 52; // ~7 days
+        else if (compFreq === 365) compInterval = 1; // 1 day
+        else if (compFreq > 365) compInterval = 1; // High freq treated as daily update with continuous logic inside
+        
+        // Contribution
+        let contribInterval = 0;
+        if (contribAmount > 0) {
+            if (contribFreq === 1) contribInterval = 365;
+            else if (contribFreq === 12) contribInterval = 365 / 12;
+            else if (contribFreq === 52) contribInterval = 365 / 52;
+            else if (contribFreq === 365) contribInterval = 1;
+        }
+
+        // Daily Rate for simulation
+        // Effective Daily Rate = (1 + r)^(1/365) - 1  for standard compounding
+        // OR r/365 for simple daily rates
+        // Standard financial formula: (1 + r/n)^(n*t).
+        // If we simulate daily, we need a daily multiplier that matches the annual rate.
+        // Simplification for web-app: use r_decimal / compFreq applied at intervals.
+        
+        let yearlyData = [];
+        let nextCompDay = compInterval;
+        let nextContribDay = contribInterval;
+        
+        // Interest buffer (accrued between compounding events)
+        let accruedInterest = 0;
+
+        for (let d = 1; d <= totalDays; d++) {
+            
+            // 1. Add Contribution ?
+            if (contribAmount > 0 && d >= nextContribDay) {
+                balance += contribAmount;
+                totalInvested += contribAmount;
+                nextContribDay += contribInterval;
+            }
+
+            // 2. Calculate Interest ?
+            // Continuous (Seconds) or Daily or High Freq
+            if (compFreq >= 365) {
+                // Apply daily interest share
+                // Rate per day = r / 365 (nominal) or (1+r)^(1/365)-1 (effective)
+                // Let's use Nominal rate split (r / n) logic which is standard for APR
+                let dailyRate = r_decimal / (compFreq > 365 ? 365 : compFreq); 
+                // If "Seconds", we just use daily resolution but formula for continuous is e^(rt).
+                // Let's stick to standard bank formula: balance * (rate/365) added daily
+                let interest = balance * (r_decimal / 365);
+                balance += interest;
+            } 
+            else {
+                // Discrete Compounding (Monthly, Weekly, Annual)
+                // We shouldn't change balance until the interval is hit.
+                // BUT simple simulation:
+                if (d >= nextCompDay) {
+                    // Time passed fraction = 1 / compFreq
+                    let periodRate = r_decimal / compFreq;
+                    let interest = balance * periodRate;
+                    balance += interest;
+                    nextCompDay += compInterval;
+                }
+            }
+
+            // End of Year Snapshot
+            if (d % 365 === 0) {
+                let year = d / 365;
+                yearlyData.push({
+                    year: year,
+                    balance: balance,
+                    invested: totalInvested,
+                    interest: balance - totalInvested
+                });
+            }
+        }
+
+        return {
+            finalBalance: balance,
+            totalInvested: totalInvested,
+            totalInterest: balance - totalInvested,
+            yearlyData: yearlyData
+        };
+    }
+
+    // --- MAIN CALCULATORS ---
+
+    function calculate() {
+        const errorDiv = document.getElementById('errorMsg');
+        errorDiv.innerText = "";
+        
+        if (currentMode === 'modeA') calculateModeA(errorDiv);
+        else calculateModeB(errorDiv);
+    }
+
+    function calculateModeA(errorDiv) {
+        // Inputs
+        const tokens = parseFR(document.getElementById('a_tokens').value);
+        const tokenPrice = parseFR(document.getElementById('a_token_price').value);
+        const P = tokens * tokenPrice;
+        document.getElementById('a_capital_display').innerText = formatEUR(P);
+
+        const r_pct = parseFR(document.getElementById('a_rate').value);
+        const years = parseInt(document.getElementById('a_years').value);
+        const compFreq = parseInt(document.getElementById('a_freq').value);
+        
+        const hasContrib = document.getElementById('a_contrib_active').checked;
+        const contribVal = hasContrib ? parseFR(document.getElementById('a_contrib').value) : 0;
+        const contribFreq = parseInt(document.getElementById('a_contrib_freq').value);
+
+        if (P < 0 || r_pct < 0 || years <= 0) {
+            errorDiv.innerText = "Veuillez vérifier les valeurs.";
+            return;
+        }
+
+        // Run Sim
+        const res = runSimulation(P, r_pct, years, compFreq, contribVal, contribFreq);
+
+        // Display
+        updateResults(res, tokenPrice, years, r_pct);
+        buildTable(res.yearlyData, tokenPrice);
+    }
+
+    function calculateModeB(errorDiv) {
+        // Inputs
+        const tokens = parseFR(document.getElementById('b_tokens').value);
+        const tokenPrice = parseFR(document.getElementById('b_token_price').value);
+        const P = tokens * tokenPrice;
+        document.getElementById('b_capital_display').innerText = formatEUR(P);
+
+        const target = parseFR(document.getElementById('b_target').value);
+        const years = parseInt(document.getElementById('b_years').value);
+        const compFreq = parseInt(document.getElementById('b_freq').value);
+        
+        const hasContrib = document.getElementById('b_contrib_active').checked;
+        const contribVal = hasContrib ? parseFR(document.getElementById('b_contrib').value) : 0;
+        const contribFreq = parseInt(document.getElementById('b_contrib_freq').value);
+
+        if (P < 0 || target <= P && contribVal === 0) {
+            errorDiv.innerText = "Le montant visé semble trop faible par rapport au départ.";
+            clearResults();
+            return;
+        }
+
+        // FIND RATE via Binary Search
+        let low = 0;
+        let high = 10000; // Max 10,000%
+        let foundRate = 0;
+        let iterations = 0;
+        
+        // Precision loop
+        while (iterations < 100) {
+            let mid = (low + high) / 2;
+            let sim = runSimulation(P, mid, years, compFreq, contribVal, contribFreq);
+            
+            if (Math.abs(sim.finalBalance - target) < 1) { // 1€ precision
+                foundRate = mid;
+                break;
+            }
+            if (sim.finalBalance < target) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+            foundRate = mid;
+            iterations++;
+        }
+
+        document.getElementById('res_val_1').innerText = formatPct(foundRate);
+        
+        // Re-run final sim for details
+        const finalSim = runSimulation(P, foundRate, years, compFreq, contribVal, contribFreq);
+        
+        // Manual override for display logic in Mode B
+        document.getElementById('res_val_2').innerText = formatEUR(finalSim.totalInterest);
+        document.getElementById('res_val_3').innerText = formatEUR(finalSim.totalInvested);
+        
+        // Token details
+        if (tokenPrice > 0) {
+            const totalTok = finalSim.finalBalance / tokenPrice;
+            const gainTok = finalSim.totalInterest / tokenPrice;
+            const boughtTok = (finalSim.totalInvested - P) / tokenPrice;
+            
+            document.getElementById('res_tokens_total').innerText = `Total : ${formatToken(totalTok)} Tokens`;
+            document.getElementById('res_tokens_gained').innerText = `+ ${formatToken(gainTok)} Tokens (Intérêts)`;
+            document.getElementById('res_tokens_bought').innerText = `+ ${formatToken(boughtTok)} Tokens (Achetés)`;
+        }
+
+        updateRemuneration(finalSim.totalInterest, years);
+        
+        // Table for Mode B (Fixed rate, history view)
+        buildTable(finalSim.yearlyData, tokenPrice);
+        document.getElementById('tableTitle').innerText = "Simulation avec le taux trouvé";
+    }
+
+    // --- DISPLAY HELPERS ---
+
+    function updateResults(res, tokenPrice, years, r_pct) {
+        document.getElementById('res_val_1').innerText = formatEUR(res.finalBalance);
+        document.getElementById('res_val_2').innerText = formatEUR(res.totalInterest);
+        document.getElementById('res_val_3').innerText = formatEUR(res.totalInvested);
+
+        if (tokenPrice > 0) {
+            const initialTokens = res.totalInvested > 0 ? (res.totalInvested / tokenPrice) : 0; // Simple approx for bought
+            // More accurate: Initial + (Contrib / Price)
+            // But we don't track bought tokens in Sim loop separately, let's deduce
+            const startTokens = parseFR(document.getElementById('a_tokens').value);
+            const boughtTokens = (res.totalInvested - (startTokens * tokenPrice)) / tokenPrice;
+            const totalTokens = res.finalBalance / tokenPrice;
+            const interestTokens = res.totalInterest / tokenPrice;
+
+            document.getElementById('res_tokens_total').innerText = `Total : ${formatToken(totalTokens)} Tokens`;
+            document.getElementById('res_tokens_gained').innerText = `+ ${formatToken(interestTokens)} Tokens (Intérêts)`;
+            document.getElementById('res_tokens_bought').innerText = `+ ${formatToken(boughtTokens)} Tokens (Achetés)`;
+        } else {
+             document.querySelectorAll('.res-subvalue').forEach(el => el.innerText = '');
+        }
+
+        updateRemuneration(res.totalInterest, years);
+
+        // Theoretical Yield
+        const theoreticalAnnualYield = res.finalBalance * (r_pct/100);
+        const yieldBox = document.getElementById('current_yield_box');
+        if (theoreticalAnnualYield > 0) {
+            yieldBox.style.display = 'block';
+            document.getElementById('yield_val').innerText = formatEUR(theoreticalAnnualYield) + " / an";
+        } else {
+            yieldBox.style.display = 'none';
+        }
+    }
+
+    function updateRemuneration(totalInterests, years) {
+        if (years <= 0) years = 1;
+        const perYear = totalInterests / years;
+        const perMonth = perYear / 12;
+        const perWeek = perYear / 52;
+        const perDay = perYear / 365;
+        const perSecond = perYear / SECONDS_IN_YEAR;
+
+        const formatSmall = (val) => {
+            let digits = val < 0.01 ? 5 : (val < 1 ? 4 : 2);
+            return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(val);
+        };
+
+        document.getElementById('gain_year').innerText = formatSmall(perYear);
+        document.getElementById('gain_month').innerText = formatSmall(perMonth);
+        document.getElementById('gain_week').innerText = formatSmall(perWeek);
+        document.getElementById('gain_day').innerText = formatSmall(perDay);
+        document.getElementById('gain_second').innerText = formatSmall(perSecond);
+    }
+
+    function buildTable(data, tokenPrice) {
+        const tableBody = document.querySelector('#resultTable tbody');
+        const tableHead = document.querySelector('#resultTable thead');
+        tableBody.innerHTML = '';
+        tableHead.innerHTML = `<tr><th>Année</th><th>Capital Début</th><th>Intérêts</th><th>Versements</th><th>Capital Fin</th></tr>`;
+
+        // We only have end-of-year data in 'data' array.
+        // We need to reconstruct Start/Contrib/Interest from previous row.
+        let prevBalance = data.length > 0 ? (data[0].invested - (data[0].invested - data[0].balance)) : 0; 
+        // Logic fix: The simulation returns cumulative data.
+        // We need diffs.
+        
+        // Actually, Sim returns snapshots.
+        // Year 1: Balance X, Invested Y.
+        // Start Balance was Initial P.
+        
+        let initialP = currentMode === 'modeA' 
+            ? parseFR(document.getElementById('a_tokens').value) * parseFR(document.getElementById('a_token_price').value)
+            : parseFR(document.getElementById('b_tokens').value) * parseFR(document.getElementById('b_token_price').value);
+
+        let lastBalance = initialP;
+        let lastInvested = initialP;
+
+        data.forEach(row => {
+            const yearContrib = row.invested - lastInvested;
+            // Interest this year = (EndBalance - StartBalance) - Contrib
+            const yearInterest = (row.balance - lastBalance) - yearContrib;
+            
+            let htmlRow = `<tr>
+                <td>${row.year}</td>
+                <td>${formatEUR(lastBalance)}</td>
+                <td style="color:var(--success)">+${formatEUR(yearInterest)}</td>
+                <td>${formatEUR(yearContrib)}</td>
+                <td><strong>${formatEUR(row.balance)}</strong></td>
+            </tr>`;
+            tableBody.insertAdjacentHTML('beforeend', htmlRow);
+
+            lastBalance = row.balance;
+            lastInvested = row.invested;
+        });
+    }
+
+    function clearResults() {
+        document.getElementById('res_val_1').innerText = "-";
+        document.getElementById('res_val_2').innerText = "-";
+        document.getElementById('res_val_3').innerText = "-";
+        document.querySelectorAll('.res-subvalue').forEach(el => el.innerText = '');
+    }
+
+    window.onload = () => { calculate(); }
+</script>
+
+</body>
+</html>
+
+
